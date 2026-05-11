@@ -1,0 +1,153 @@
+# =========================================================
+# Spring Boot / Java
+# =========================================================
+
+target/
+*.class
+*.jar
+*.war
+*.ear
+
+# Maven
+.mvn/wrapper/maven-wrapper.jar
+
+# Gradle
+.gradle/
+build/
+
+# Logs
+logs/
+*.log
+
+# Spring Boot Devtools
+.springBeans
+.restart/
+
+# =========================================================
+# IDE Files
+# =========================================================
+
+# IntelliJ
+.idea/
+*.iml
+
+# Eclipse
+.project
+.classpath
+.settings/
+
+# VS Code
+.vscode/
+
+# NetBeans
+nbproject/
+
+# =========================================================
+# OS Files
+# =========================================================
+
+.DS_Store
+Thumbs.db
+.key
+.pub
+
+# =========================================================
+# Docker
+# =========================================================
+
+# Docker override files
+docker-compose.override.yml
+
+# Local docker env files
+.env
+.env.*
+
+# Docker temp files
+*.pid
+
+# =========================================================
+# Kubernetes
+# =========================================================
+
+# Kube config
+kubeconfig
+*.kubeconfig
+
+# Helm generated files
+charts/**/charts/
+charts/**/tmp/
+
+# Helm package archives
+*.tgz
+
+# Kustomize generated
+kustomize-build/
+
+# =========================================================
+# Security / Secrets
+# =========================================================
+
+# Certificates
+*.pem
+*.key
+*.crt
+*.p12
+*.jks
+*.keystore
+
+# Secrets
+secrets/
+secret/
+*.secret
+
+# Hashicorp Vault
+.vault-token
+
+# =========================================================
+# DevSecOps / Scanning Reports
+# =========================================================
+
+# Trivy
+trivy-report.*
+trivy-results.*
+
+# OWASP Dependency Check
+dependency-check-report.*
+dependency-check/
+
+# SBOM
+sbom.*
+bom.*
+
+# Gitleaks
+gitleaks-report.*
+
+# SonarQube
+.scannerwork/
+
+# Semgrep
+.semgrep/
+
+# =========================================================
+# Terraform (If Used)
+# =========================================================
+
+.terraform/
+*.tfstate
+*.tfstate.*
+crash.log
+
+# =========================================================
+# Jenkins
+# =========================================================
+
+.jenkins/
+
+# =========================================================
+# Temporary Files
+# =========================================================
+
+tmp/
+temp/
+*.tmp
+*.swp

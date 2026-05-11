@@ -1,0 +1,76 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+    name: app
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: devsecops-app
+    namespace: app
+    labels:
+        app: devsecops-app
+spec:
+    replicas: 1
+    selector:
+        matchLabels:
+            app: devsecops-app
+    template:
+        metadata:
+            labels:
+                app: devsecops-app
+        spec:
+            containers:
+              - name: devsecops-app
+                image: neeabhishek/devsecops:main
+                imagePullPolicy: IfNotPresent
+                ports:
+                  - containerPort: 8080
+                resources:
+                    requests:
+                        cpu: "500m"
+                        memory: "500Mi"
+                    limits:
+                        cpu: "1"
+                        memory: "500Mi"
+                startupProbe:
+                    httpGet:
+                        path: /health
+                        port: 8080
+                    initialDelaySeconds: 20 #Wait till much seconds for the app to start and then retry
+                    periodSeconds: 5 #Each try to be done after this much seconds.
+                    failureThreshold: 12 #Maximum retries
+                readinessProbe:
+                    httpGet:
+                        path: /health
+                        port: 8080
+                    initialDelaySeconds: 10
+                    periodSeconds: 5
+                    timeoutSeconds: 2 #If success is not received within this much seconds then retry.
+                    failureThreshold: 3
+                    successThreshold: 1 #Number of success probes required for the app to be considered healthy again
+                livenessProbe:
+                    httpGet:
+                        path: /health
+                        port: 8080
+                    initialDelaySeconds: 30
+                    periodSeconds: 10
+                    timeoutSeconds: 3
+                    failureThreshold: 3
+---
+apiVersion: v1
+kind: Service
+metadata:
+    name: devsecops-svc
+    namespace: app
+    labels:
+        app: devsecops-app
+spec:
+    type: NodePort
+    selector:
+        app: devsecops-app
+    ports:
+      - targetPort: 8080 #Container Port
+        port: 8080 #Service Port
+        nodePort: 30001 #External Access Port
