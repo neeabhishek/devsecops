@@ -12,7 +12,7 @@ def call(Map config = [:]){
         def sast = sh (
         script: """
             cd ${workspace}/${serviceName} && \
-            mvn sonar:sonar \
+            mvn clean install && mvn sonar:sonar \
             -Dsonar.projectName=${serviceName}
         """,
         returnStatus: true
