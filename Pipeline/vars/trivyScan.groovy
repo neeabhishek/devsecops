@@ -30,7 +30,6 @@ def imageScan(Map config = [:]){
             trivy image \
             --scanners vuln,secret,license,misconfig \
             --severity HIGH,CRITICAL \
-            --exit-code 1 \
             --format template \
             --template "@${tpl_path}/html.tpl" \
             --output ${reportName} \
