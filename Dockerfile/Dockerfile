@@ -1,7 +1,7 @@
 #Main Runtime Stage
 FROM eclipse-temurin:21-jre AS runtime
 WORKDIR /app
-COPY enterprise-devsecops-demo/target/enterprise-devsecops-demo-1.0.0.jar /app/enterprise-devsecops-demo-1.0.0.jar
+COPY spring-boot/target/enterprise-devsecops-demo-1.0.0.jar /app/enterprise-devsecops-demo-1.0.0.jar
 RUN groupadd -r appadmin && \
     useradd -r -g appadmin appadmin && \
     chown -R appadmin:appadmin /app && \
