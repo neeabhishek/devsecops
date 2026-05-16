@@ -2,16 +2,16 @@ def call(Map config = [:]){
 
     def workspace = config.workspace ?: env.WORKSPACE
     def serviceName = config.serviceName ?: env.SERVICE_NAME
-    def sonarQubeCred = config.sonarQubeCred 
+    def sonarQubeCred = config.sonarQubeCred
 
     if(!sonarQubeCred){
         error("SonarQube Cred were not provided")
     }
 
-    withSonarQubeEnv(sonarQubeCred){
+    withSonarQubeEnv('SonarQubeInstance'){
         def sast = sh (
         script: """
-            cd ${workspace} && \
+            cd ${workspace}/${serviceName} && \
             mvn sonar:sonar \
             -Dsonar.projectName=${serviceName}
         """,
