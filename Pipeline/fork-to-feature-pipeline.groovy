@@ -23,7 +23,7 @@ pipeline{
         stage('Fork check-out'){
             steps{
                 script{
-
+                    //FORK CHECKOUT
                 }
             }
         }
@@ -32,14 +32,14 @@ pipeline{
                 stage('Trivy - Filesystem scan'){
                     steps{
                         script{
-
+                            //SHIFT_LEFT SCANNING
                         }
                     }
                 }
                 stage('SAST - SonarQube'){
                     steps{
                         script{
-
+                            //SAST
                         }
                     }
                 }
@@ -48,7 +48,7 @@ pipeline{
         stage('Quality Gate'){
             steps{
                 script{
-
+                    //QUALITY GATE VALIDATIOn
                 }
             }
         }
@@ -57,14 +57,14 @@ pipeline{
                 stage('Unit Testing'){
                     steps{
                         script{
-
+                            //UNIT TEST
                         }
                     }
                 }
                 stage('SBOM Generation for source-code'){
                     steps{
                         script{
-
+                            //SBOM OF SOURCE CODE
                         }
                     }
                 }
@@ -75,14 +75,14 @@ pipeline{
                 stage('Build raw artifacts'){
                     steps{
                         script{
-
+                            //BUILDING RAW ARTIFACTS - JAR/WAR/EAR
                         }
                     }
                 }
                 stage('Build Image'){
                     steps{
                         script{
-
+                            //IMAGE BUILD
                         }
                     }
                 }
@@ -91,14 +91,14 @@ pipeline{
         stage('Runtime Image Scanning'){
             steps{
                 script{
-
+                    //TRIVY SCANNING FOR VULN
                 }
             }
         }
         stage('SBOM of Image'){
             steps{
                 script{
-
+                    //SBOM OF IMAGE
                 }
             }
         }
@@ -107,18 +107,17 @@ pipeline{
         success {
             mailNotification(
                 buildStatus: 'SUCCESS'
-                recipient: 'neeabhishek@gmail.com'
+                recipient: ''
             )    
+            cleanWs()
         }
         failure {
             mailNotification(
                 buildStatus: 'FAILURE'
-                recipient: 'neeabhishek@gmail.com'
+                recipient: ''
             )
-
-        }
-        always {
             cleanWs()
+
         }
     }
 }
