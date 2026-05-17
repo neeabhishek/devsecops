@@ -310,6 +310,3 @@ Report Generation
 | Automation            | Jenkins Shared Libraries |
 | Artifact Management   | Docker Registry / Nexus  |
 ```
-
-Repository Reference: :contentReference[oaicite:1]{index=1}
-::contentReference[oaicite:2]{index=2}
