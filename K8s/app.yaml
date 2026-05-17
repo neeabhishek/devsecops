@@ -23,7 +23,7 @@ spec:
         spec:
             containers:
               - name: devsecops-app
-                image: neeabhishek/devsecops:main
+                image:  ##Your repective Repo, Image, and Tag
                 imagePullPolicy: IfNotPresent
                 ports:
                   - containerPort: 8080
