@@ -2,6 +2,8 @@ def call(Map config = [:]) {
 
     def color = config.buildStatus == 'SUCCESS' ? '#28a745' : '#dc3545'
     def attachments = config.attachmentsPattern ?: '*.html,*.json'
+    def failedStage = config.failedStage
+
     emailext(
         subject: "${config.buildStatus}: DevSecOps Pipeline - Build (${env.BUILD_NUMBER})",
         mimeType: "text/html",
@@ -42,7 +44,7 @@ def call(Map config = [:]) {
 
             <tr>
                 <td><b>Failed Stage</b></td>
-                <td>${env.FAILED_STAGE ?: 'N/A'}</td>
+                <td>${failedStage ?: 'N/A'}</td>
             </tr>
 
             <tr>
