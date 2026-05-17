@@ -5,25 +5,28 @@ Author: Abhishek Neelakandan
 Desc: CICD + Supply chain security Pipline for trusted branch (feature to main) with Shared libraries
 */
 
+def FAILED_STAGE = "NA"
+
 pipeline{
     agent any
     parameters {
-        string(name: 'GIT_URL' , defaultValue: 'https://github.com/neeabhishek/devsecops.git' , description: 'GIT URL')
+        string(name: 'GIT_URL' , defaultValue: '' , description: 'GIT URL')
     }
     environment{
-        NAMESPACE = "app"
-        SERVICE_NAME = "devsecops-project"
-        TARGET_BRANCH = "main"
-        SOURCE_BRANCH = "feature"
-        REPO = "neeabhishek/devsecops"
-        TRIVY_TPL_PATH = "/home/ubuntu/trivy-reports"
-        SONAR_TOKEN = credentials('SONAR-QUBE')
-        GITHUB_TOKEN = credentials('github-api-token')
+        NAMESPACE = ""
+        SERVICE_NAME = ""
+        TARGET_BRANCH = ""
+        SOURCE_BRANCH = ""
+        REPO = ""
+        TRIVY_TPL_PATH = ""
+        SONAR_TOKEN = credentials('')
+        GITHUB_TOKEN = credentials('')
     }
     stages{
         stage('PR Validation'){
             steps{
                 script {
+                    FAILED_STAGE = env.STAGE_NAME
                     echo("Starting PR Validation/Check")
                     def validation = sh (
                         script: """
@@ -37,7 +40,8 @@ pipeline{
                         returnStdout: true
                     ).trim()
                     if (validation?.trim()){
-                        echo("PR has been detected against main branch, starting security, build, and supply chain stages")
+                        env.PR_NUMBER = validation
+                        echo("PR ${env.PR_NUMBER} has been detected against main branch, starting security, build, and supply chain stages")
                     } else {
                         error("There are no open PR against main branch, hence skipping security, build, and supply chain stages")
                     }
@@ -47,6 +51,7 @@ pipeline{
         stage('Git check-out'){
             steps{
                 script{
+                    FAILED_STAGE = env.STAGE_NAME
                     gitCheckOut(
                         url: "${params.GIT_URL}",
                         branch: "${env.TARGET_BRANCH}",
@@ -58,6 +63,7 @@ pipeline{
         stage('Local Merge'){
             steps{
                 script{
+                    FAILED_STAGE = env.STAGE_NAME
                     echo("Creating a local merge for further stage workflows")
                     def local_merge = sh(
                         script: """
@@ -82,6 +88,7 @@ pipeline{
                 stage('Trivy - Filesystem scan'){
                     steps{
                         script{
+                            FAILED_STAGE = env.STAGE_NAME
                             def fs_scan = trivyScan.fileSystemScan(
                                 reportName: "fs-trivy-report.html"
                             )
@@ -96,6 +103,7 @@ pipeline{
                 stage('SAST-SonarQube'){
                     steps{
                         script{
+                            FAILED_STAGE = env.STAGE_NAME
                             def sast = sastAnalysis(
                                 serviceName: "${env.SERVICE_NAME}",
                                 sonarQubeCred: "${env.SONAR_TOKEN}"
@@ -114,6 +122,7 @@ pipeline{
         stage('Quality Gate'){
             steps{
                 script{
+                    FAILED_STAGE = env.STAGE_NAME
                     timeout(time: 5, unit: 'MINUTES') {
                         waitForQualityGate abortPipeline: true
                     }
@@ -126,6 +135,7 @@ pipeline{
                 stage('Unit Testing'){
                     steps{
                         script{
+                            FAILED_STAGE = env.STAGE_NAME
                             def unit_test = buildAndTest.unitTesting()
                             errorLogging(
                                 statusCode: unit_test,
@@ -138,6 +148,7 @@ pipeline{
                 stage('SBOM Generation for source-code'){
                     steps{
                         script{
+                            FAILED_STAGE = env.STAGE_NAME
                             def sbom = sbomGeneration.sbomFileSystem(
                                 outputFileName: 'sbom-sourceCode.json'
                             )
@@ -156,6 +167,7 @@ pipeline{
                 stage('Build raw artifacts'){
                     steps{
                         script{
+                            FAILED_STAGE = env.STAGE_NAME
                             def build_rawArtifacts = buildAndTest.buildArtifacts()
                             errorLogging(
                                 statusCode: build_rawArtifacts,
@@ -168,6 +180,7 @@ pipeline{
                 stage('Build Image'){
                     steps{
                         script{
+                            FAILED_STAGE = env.STAGE_NAME
                             def build_image = buildAndTest.buildImage()
                             errorLogging(
                                 statusCode: build_image,
@@ -182,6 +195,7 @@ pipeline{
         stage('Runtime Image Scanning'){
             steps{
                 script{
+                    FAILED_STAGE = env.STAGE_NAME
                     def image_scan = trivyScan.imageScan(
                         reportName: 'trivy-image-report.html'
                     )
@@ -196,6 +210,7 @@ pipeline{
         stage('SBOM of Image'){
             steps{
                 script{
+                    FAILED_STAGE = env.STAGE_NAME
                     def image_sbom = sbomGeneration.sbomImage(
                         outPutFileName: 'image-sbom-spdx.json'
                     )
@@ -212,6 +227,7 @@ pipeline{
                 stage('Push raw artifacts'){
                     steps{
                         script{
+                            FAILED_STAGE = env.STAGE_NAME
                             // PUSH RAW ARTIFACTS - JAR/WAR/EAR to Artifactory/JFrog/Nexus
                             echo("PUSHED RAW ARTIFACTS - JAR/WAR/EAR to Artifactory/JFrog/Nexus")
                         }
@@ -220,6 +236,7 @@ pipeline{
                 stage('Push Image'){
                     steps{
                         script{
+                            FAILED_STAGE = env.STAGE_NAME
                             echo("Establising a session with Image Repositry")
                             withCredentials([usernamePassword(credentialsId: 'DOCKER-CRED', passwordVariable: 'DOCKER_PASS', usernameVariable: 'DOCKER_USER')]) {
                                 sh """
@@ -246,9 +263,11 @@ pipeline{
         stage('Sign Image and SBOM'){
             steps{
                 script{
+                    FAILED_STAGE = env.STAGE_NAME
                     def signing = sh(
                         script: """
-                            cosign sign --yes ${env.REPO}:${env.IMAGE_TAG}
+                            COSIGN_PASSWORD="" cosign generate-key-pair
+                            COSIGN_PASSWORD="" cosign sign --key cosign.key ${env.REPO}:${env.IMAGE_TAG}
                             cosign attach sbom \
                             --sbom image-sbom-spdx.json \
                             ${env.REPO}:${env.IMAGE_TAG}
@@ -266,9 +285,10 @@ pipeline{
         stage('Deployment'){
             steps{
                 script{
+                    FAILED_STAGE = env.STAGE_NAME
                     def validation = sh (
                         script: """
-                            cosign verify ${env.REPO}:${env.IMAGE_TAG}
+                            cosign verify --key cosign.pub ${env.REPO}:${env.IMAGE_TAG}
                         """,
                         returnStatus: true
                     )
@@ -283,7 +303,7 @@ pipeline{
                         errorLogging(
                             statusCode: deployment,
                             stageName: "${env.STAGE_NAME}",
-                            operation: "Deployment to QA successful post Image signing verification stage"
+                            operation: "Deployment to QA post Image signing verification stage"
                         )
                         sleep(time: '1', unit: 'MINUTES')
                     } else {
@@ -295,9 +315,10 @@ pipeline{
         stage('Health Check'){
             steps{
                 script{
+                    FAILED_STAGE = env.STAGE_NAME
                     def url_fetcher = sh (
                         script: """
-                            minikube service devsecops-service \
+                            minikube service devsecops-svc \
                             -n ${env.NAMESPACE} \
                             --url
                         """,
@@ -312,7 +333,7 @@ pipeline{
                     if (health_check == "200"){
                         echo("Service is healthy")
                     } else {
-                        echo("Initated rollback as service is not avaiabile ")
+                        echo("Initiated rollback as service is not avaiabile ")
                         def rollback = sh (
                             script:"""
                                 kubectl rollout undo deployment -n ${env.NAMESPACE}
@@ -331,28 +352,37 @@ pipeline{
     }
     post {
         success {
+
+            archiveArtifacts(
+                artifacts: '*.html,*.json',
+                fingerprint: true
+            )
+
             mailNotification(
                 buildStatus: 'SUCCESS',
-                recipient: 'neeabhishek@gmail.com',
-                attachmentsPattern: '''
-                    *.html,
-                    *.json
-                '''
+                recipient: '',
+                failedStage: FAILED_STAGE,
+                attachmentsPattern: '*.html,*.json'
             )
-        }
-        failure {
-            mailNotification(
-                buildStatus: 'FAILURE',
-                recipient: 'neeabhishek@gmail.com',
-                attachmentsPattern: '''
-                    *.html,
-                    *.json
-                '''
-            )
-        }
-        always {
+
             cleanWs()
         }
-        
+
+        failure {
+
+            archiveArtifacts(
+                artifacts: '*.html,*.json',
+                fingerprint: true
+            )
+
+            mailNotification(
+                buildStatus: 'FAILURE',
+                recipient: '',
+                failedStage: FAILED_STAGE,
+                attachmentsPattern: '*.html,*.json'
+            )
+
+            cleanWs()
+        }
     }
 }
