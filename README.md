@@ -209,6 +209,7 @@ Trivy Scanning
 Report Generation
 ```
 ## Shared Library Benefits
+```
 flowchart LR
 
 A[Reusable Modules] --> B[Standardized Pipelines]
