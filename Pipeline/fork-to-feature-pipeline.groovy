@@ -8,9 +8,9 @@ Desc: CI workflow for untrusted branch (fork to feature)
 pipeline{
     agent any 
     environment{
-        GITHUB_OWNER = "neeabhishek"
-        GITHUB_REPO = "devsecops"
-        IMAGE_REPO  = "neeabhishek/devsecops"
+        GITHUB_OWNER = ""
+        GITHUB_REPO = ""
+        IMAGE_REPO  = ""
     }
     stages{
         stage('PR Validation and Fork details gathering'){
