@@ -24,7 +24,7 @@
 
 # Overview
 
-This repository demonstrates a production-grade **DevSecOps CI/CD Pipeline** engineered with strong focus on:
+This repository demonstrates a production-pattern **DevSecOps CI/CD Pipeline** engineered with strong focus on:
 
 - Shift-Left Security
 - Secure Software Supply Chain
