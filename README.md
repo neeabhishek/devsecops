@@ -208,19 +208,6 @@ SonarQube Scanning
 Trivy Scanning
 Report Generation
 ```
-## Shared Library Benefits
-```
-flowchart LR
-
-A[Reusable Modules] --> B[Standardized Pipelines]
-
-B --> C[Faster Onboarding]
-
-C --> D[Reduced Code Duplication]
-
-D --> E[Centralized Governance]
-
-E --> F[Enterprise Scalability]
 
 ## Repository Structure
 ```
